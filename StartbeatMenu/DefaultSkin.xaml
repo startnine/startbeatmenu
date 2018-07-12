@@ -40,6 +40,7 @@
                             <RowDefinition Height="32"/>
                             <RowDefinition Height="56"/>
                         </Grid.RowDefinitions>
+                        <Border Grid.Row="1" Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#6B74B8FC" CornerRadius="6,6,0,0"/>
                         <Border Background="Transparent" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="4">
                             <Border BorderBrush="#7F000000" BorderThickness="1" CornerRadius="6,6,0,0">
                                 <Border.Background>

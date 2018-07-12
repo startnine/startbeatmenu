@@ -31,7 +31,7 @@ namespace StartbeatMenu
     /// </summary>
     public partial class MainWindow : QuadContentWindow
     {
-        [DllImport("dwmapi.dll")]
+        /*[DllImport("dwmapi.dll")]
         static extern Int32 DwmIsCompositionEnabled(out Boolean enabled);
 
         [DllImport("dwmapi.dll")]
@@ -81,7 +81,7 @@ namespace StartbeatMenu
             Enable = 1,
             BlurRegion = 2,
             TransitionMaximized = 4
-        }
+        }*/
 
         TimeSpan AnimationDuration = TimeSpan.FromMilliseconds(250);
 
@@ -274,7 +274,7 @@ namespace StartbeatMenu
             
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
+        /*protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
             var hwnd = new WindowInteropHelper(this).Handle;
@@ -293,7 +293,7 @@ namespace StartbeatMenu
                     DwmEnableBlurBehindWindow(new WindowInteropHelper(this).EnsureHandle(), ref blur);
                 }
             }
-        }
+        }*/
 
         new public void Show()
         {
