@@ -16,13 +16,13 @@
         </ResourceDictionary>
     </local:QuadContentWindow.Resources>
     <local:QuadContentWindow.SecondContent>
-        <TextBox Margin="11,11,15,10"/>
+        <TextBox x:Name="SearchTextBox" Style="{DynamicResource SearchTextBoxStyle}" TextChanged="SearchTextBox_TextChanged"/>
     </local:QuadContentWindow.SecondContent>
     <local:QuadContentWindow.ThirdContent>
         <ListView x:Name="PlacesListView" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PlacesListViewStyle}" ItemsSource="{Binding Places}" SelectionChanged="ListView_SelectionChanged"/>
     </local:QuadContentWindow.ThirdContent>
     <local:QuadContentWindow.FourthContent>
-        <DockPanel UseLayoutRounding="True">
+        <DockPanel UseLayoutRounding="True" HorizontalAlignment="Left">
             <!--Grid DockPanel.Dock="Right">
                 <Rectangle x:Name="ShutDownRightButtonSizingAid" Fill="Transparent" Stroke="Transparent" StrokeThickness="0"/-->
             <Button x:Name="ShutDownRightButton" DockPanel.Dock="Right" Style="{DynamicResource ShutDownRightButton}" Click="ShutDownRightButton_Click">
@@ -49,19 +49,19 @@
                         </ContextMenu.Items>
                     </apictrl:TouchableContextMenu>
                 </Button.ContextMenu>
-                >
             </Button>
             <!--/Grid-->
             <Button Style="{DynamicResource ShutDownLeftButton}">Shut down</Button>
         </DockPanel>
     </local:QuadContentWindow.FourthContent>
-        
+
     <Grid>
-        <DockPanel>
-            <ToggleButton x:Name="AllAppsToggleButton" Style="{DynamicResource AllAppsButtonStyle}" Click="AllAppsToggleButton_Click" DockPanel.Dock="Bottom"/>
+        <ListView x:Name="SearchListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PinnedItemsListViewStyle}" Visibility="Hidden" SelectionChanged="ListView_SelectionChanged"/>
+        <DockPanel x:Name="FixedAppListsDockPanel">
+            <ToggleButton x:Name="AllAppsToggleButton" Style="{DynamicResource AllAppsToggleButtonStyle}" Click="AllAppsToggleButton_Click" DockPanel.Dock="Bottom"/>
             <Grid>
-                <ListView x:Name="PinnedListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" Style="{DynamicResource PinnedItemsListViewStyle}" SelectionChanged="ListView_SelectionChanged"/>
-                <TreeView x:Name="AllAppsTree" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Hidden"/>
+                <ListView x:Name="PinnedAppsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" Style="{DynamicResource PinnedItemsListViewStyle}" SelectionChanged="ListView_SelectionChanged"/>
+                <TreeView x:Name="AllAppsTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource AllAppsTreeViewStyle}" Visibility="Hidden" SelectedItemChanged="TreeView_SelectionChanged"/>
             </Grid>
         </DockPanel>
     </Grid>

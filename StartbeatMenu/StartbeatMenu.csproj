@@ -65,10 +65,6 @@
     <Compile Include="ContractImpl.cs" />
     <Compile Include="StartbeatMenuAddIn.cs" />
     <Compile Include="QuadContentWindow.cs" />
-    <Page Include="Aphelion.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="DefaultSkin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

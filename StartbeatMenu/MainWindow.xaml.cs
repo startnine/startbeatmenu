@@ -189,7 +189,46 @@ namespace StartbeatMenu
 
         public static void OnCurrentMenuModePropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
+            var main = (sender as MainWindow);
 
+            if ((main.CurrentMenuMode == MenuMode.Search) || (main.CurrentMenuMode == MenuMode.LeftColumnJumpList))
+            {
+                main.PlacesListView.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                main.PlacesListView.Visibility = Visibility.Visible;
+            }
+
+            if (main.CurrentMenuMode == MenuMode.Search)
+            {
+                main.SearchListView.Visibility = Visibility.Visible;
+                main.FixedAppListsDockPanel.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                main.SearchListView.Visibility = Visibility.Hidden;
+                main.FixedAppListsDockPanel.Visibility = Visibility.Visible;
+            }
+
+            if (main.CurrentMenuMode == MenuMode.AllApps)
+            {
+                main.PinnedAppsListView.Visibility = Visibility.Hidden;
+                main.AllAppsTreeView.Visibility = Visibility.Visible;
+                if (main.AllAppsToggleButton.IsChecked != true)
+                {
+                    main.AllAppsToggleButton.IsChecked = true;
+                }
+            }
+            else
+            {
+                main.PinnedAppsListView.Visibility = Visibility.Visible;
+                main.AllAppsTreeView.Visibility = Visibility.Hidden;
+                if (main.AllAppsToggleButton.IsChecked != false)
+                {
+                    main.AllAppsToggleButton.IsChecked = false;
+                }
+            }
         }
 
         public MainWindow()
@@ -199,24 +238,21 @@ namespace StartbeatMenu
 
             Deactivated += (sender, e) => Hide();
 
-            /*foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%userprofile%")))
-            {
-                ListViewItem item = new ListViewItem()
-                {
-                    Content = System.IO.Path.GetFileName(s),
-                    Tag = s
-                };
-                item.MouseLeftButtonUp += delegate { Process.Start(s); };
-                if (!(item.Content.ToString().StartsWith(".")))
-                {
-                    PlacesListView.Items.Add(item);
-                }
-            }*/
+            AllAppsTreeView.ItemsSource = DiskItem.AllApps;
 
             PinnedItems.CollectionChanged += Items_CollectionChanged;
             Places.CollectionChanged += Items_CollectionChanged;
 
             IsVisibleChanged += MainWindow_IsVisibleChanged;
+        }
+
+        public void DisplayMenu()
+        {
+            Topmost = true;
+            Show();
+            Focus();
+            Activate();
+            SearchTextBox.Focus();
         }
 
         private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -318,9 +354,10 @@ namespace StartbeatMenu
 
         private void ListView_SelectionChanged(Object sender, SelectionChangedEventArgs e)
         {
-            if ((sender as ListView).SelectedItem != null)
+            var l = (sender as ListView);
+            if (l.SelectedItem != null)
             {
-                var s = Environment.ExpandEnvironmentVariables(((sender as ListView).SelectedItem as DiskItem).ItemPath);
+                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DiskItem).ItemPath);
                 if (File.Exists(s) || Directory.Exists(s))
                 {
                     Process.Start(s);
@@ -329,7 +366,26 @@ namespace StartbeatMenu
                 {
                     Process.Start("cmd.exe", @"/C " + s);
                 }
-                (sender as ListView).SelectedItem = null;
+                l.SelectedItem = null;
+                Hide();
+            }
+        }
+
+        private void TreeView_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var l = (sender as TreeView);
+            if (l.SelectedItem != null)
+            {
+                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DiskItem).ItemPath);
+                if (File.Exists(s) || Directory.Exists(s))
+                {
+                    Process.Start(s);
+                }
+                else
+                {
+                    Process.Start("cmd.exe", @"/C " + s);
+                }
+                l.SelectedValuePath = null;
                 Hide();
             }
         }
@@ -337,13 +393,26 @@ namespace StartbeatMenu
         private void AllAppsToggleButton_Click(Object sender, RoutedEventArgs e)
         {
             if (AllAppsToggleButton.IsChecked == true)
+                CurrentMenuMode = MenuMode.AllApps;
+            else
+                CurrentMenuMode = MenuMode.Normal;
+
+            /*if (AllAppsToggleButton.IsChecked == true)
             {
                 BeginStoryboard((Storyboard)Resources["ShowAllApps"]);
             }
             else
             {
                 BeginStoryboard((Storyboard)Resources["HideAllApps"]);
-            }
+            }*/
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (String.IsNullOrWhiteSpace(SearchTextBox.Text))
+                CurrentMenuMode = MenuMode.Normal;
+            else
+                CurrentMenuMode = MenuMode.Search;
         }
 
         private void ShutDownContextMenu_IsVisibleChanged(Object sender, DependencyPropertyChangedEventArgs e)

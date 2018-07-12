@@ -45,10 +45,7 @@ namespace StartbeatMenu
         {
             StartMenuOpenedEntry.MessageReceived += (sender, e) =>
             {
-                ((MainWindow)Application.Current.MainWindow).Topmost = true;
-                ((MainWindow)Application.Current.MainWindow).Show();
-                ((MainWindow)Application.Current.MainWindow).Focus();
-                ((MainWindow)Application.Current.MainWindow).Activate();
+                ((MainWindow)Application.Current.MainWindow).DisplayMenu();
             };
         }
         public IList<IReceiverEntry> Entries => new[] { StartMenuOpenedEntry };

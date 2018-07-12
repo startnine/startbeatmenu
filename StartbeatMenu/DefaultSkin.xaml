@@ -12,7 +12,9 @@
 
     <apiobj:ThicknessToDoubleConverter x:Key="ThicknessToDoubleConverter"/>
 
-    <Style x:Key="WindowStyle" TargetType="{x:Type local:QuadContentWindow}">
+    <Style x:Key="WindowStyle" TargetType="{x:Type local:MainWindow}">
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="Width" Value="411"/>
         <Setter Property="MinHeight" Value="506"/>
         <Setter Property="Height" Value="506"/>
@@ -22,10 +24,10 @@
         <Setter Property="ResizeMode" Value="NoResize" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="261,0,0,0" />
+        <Setter Property="BorderThickness" Value="268,0,0,0" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:QuadContentWindow}">
+                <ControlTemplate TargetType="{x:Type local:MainWindow}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{Binding BorderThickness, Converter={StaticResource ThicknessToDoubleConverter}, ConverterParameter=Left}"/>
@@ -55,11 +57,11 @@
                         <!--Border Margin="7" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1" CornerRadius="4" Grid.Row="1" Grid.RowSpan="4">
                             <Border Margin="1" Background="White" CornerRadius="3"/>
                         </Border-->
-                        <ContentControl Content="{TemplateBinding Content}" Grid.Row="1" Grid.RowSpan="3" Margin="0,7,7,0"/>
+                        <ContentControl x:Name="FirstContentControl" Content="{TemplateBinding Content}" Grid.Row="1" Grid.RowSpan="3" Margin="0,7,7,0"/>
                         <Rectangle Height="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Grid.Row="2" Fill="#FFD6E5F5" Margin="16,0"/>
-                        <Border Grid.Row="4" Margin="7,0,7,7" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
-                            <Border Margin="1,0,1,1" Background="White" CornerRadius="0,0,3,3">
-                                <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" BorderThickness="0" CornerRadius="0,0,2,2">
+                        <Border x:Name="SecondContentFirstBorder" Grid.Row="4" Margin="7,0,7,7" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
+                            <Border x:Name="SecondContentSecondBorder" Margin="1,0,1,1" Background="White" CornerRadius="0,0,3,3">
+                                <Border x:Name="SecondContentThirdBorder" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" CornerRadius="0,0,2,2">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                             <LinearGradientBrush.GradientStops>
@@ -72,8 +74,24 @@
                                 </Border>
                             </Border>
                         </Border>
-                        <ContentControl Content="{TemplateBinding ThirdContent}" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2"/>
-                        <ContentControl Content="{TemplateBinding FourthContent}" Grid.Column="1" Grid.Row="4" Margin="6,0" HorizontalAlignment="Left" VerticalAlignment="Center" Height="22"/>
+                        <ContentControl Content="{TemplateBinding ThirdContent}" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" Margin="-4,0,5,0"/>
+                        <Grid Grid.Column="1" Grid.Row="4">
+                            <Border x:Name="FourthContentBorder" Margin="0,0,7,7" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,0,1,1" CornerRadius="0,0,4,0" Visibility="Hidden">
+                                <Border Margin="0,0,1,1" Background="White" CornerRadius="0,0,3,0">
+                                    <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Visible" BorderThickness="0" CornerRadius="0,0,2,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <LinearGradientBrush.GradientStops>
+                                                    <GradientStop Offset="0" Color="#FFCCD9EA"/>
+                                                    <GradientStop Offset="0.1" Color="#FFF1F5FB"/>
+                                                </LinearGradientBrush.GradientStops>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Border>
+                            </Border>
+                            <ContentControl Content="{TemplateBinding FourthContent}" Margin="-1,-3,0,3" HorizontalAlignment="Left" VerticalAlignment="Center" Height="22"/>
+                        </Grid>
                         <Border x:Name="UserImageFrame" Grid.Column="1" Grid.RowSpan="2" Width="58" Height="58" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="#40000000" BorderThickness="1" CornerRadius="4">
                             <Grid>
                                 <Border Margin="4" CornerRadius="1" BorderBrush="#7F000000" BorderThickness="1" Background="#7FFFFFFF">
@@ -102,9 +120,50 @@
                             </Grid>
                         </Border>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="CurrentMenuMode" Value="Search">
+                            <Setter TargetName="FirstContentControl" Property="Grid.ColumnSpan" Value="2"/>
+                            <Setter TargetName="SecondContentFirstBorder" Property="Margin" Value="7,0,0,7"/>
+                            <Setter TargetName="SecondContentFirstBorder" Property="BorderThickness" Value="1,0,0,1"/>
+                            <Setter TargetName="SecondContentFirstBorder" Property="CornerRadius" Value="0,0,0,4"/>
+                            <Setter TargetName="SecondContentSecondBorder" Property="CornerRadius" Value="0,0,0,3"/>
+                            <Setter TargetName="SecondContentThirdBorder" Property="CornerRadius" Value="0,0,0,2"/>
+                            <Setter TargetName="FourthContentBorder" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <!--Style.Triggers>
+            <Trigger Property="CurrentMenuMode" Value="AllApps">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="AllAppsTreeView" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.125"/>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="AllAppsTreeView" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                            </ObjectAnimationUsingKeyFrames>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PinnedAppsListView" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0.200" Value="{x:Static Visibility.Hidden}"/>
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="AllAppsTreeView" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.125"/>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="AllAppsTreeView" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0.200" Value="{x:Static Visibility.Hidden}"/>
+                            </ObjectAnimationUsingKeyFrames>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PinnedAppsListView" Storyboard.TargetProperty="Visibility">
+                                <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers-->
     </Style>
 
     <Style x:Key="{x:Type ListView}" TargetType="{x:Type ListView}">
@@ -125,7 +184,7 @@
                 <Setter Property="BorderBrush" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Margin" Value="0"/>
-                <Setter Property="Padding" Value="5"/>
+                <Setter Property="Padding" Value="4,5"/>
                 <Setter Property="Height" Value="38"/>
                 <Setter Property="Template">
                     <Setter.Value>
@@ -218,17 +277,17 @@
             <Setter.Value>
                 <DataTemplate DataType="{x:Type disk:DiskItem}">
                     <DockPanel>
-                        <Canvas Width="24" Height="24" Background="Gray" DockPanel.Dock="Left"/>
+                        <Canvas Width="32" Height="32" Background="Gray" DockPanel.Dock="Left"/>
                         <!-->
                             <Canvas.Background>
-                                <Binding ConverterParameter="16">
+                                <Binding ConverterParameter="32">
                                     <Binding.Converter>
                                         <disk:DiskItemToIconImageBrushConverter/>
                                     </Binding.Converter>
                                 </Binding>
                             </Canvas.Background>
                         </Canvas-->
-                        <TextBlock Text="{Binding ItemName}" Margin="5,0,0,0"/>
+                        <TextBlock Text="{Binding ItemName}" Margin="6,0,0,0"/>
                     </DockPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -364,7 +423,42 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
     </Style>
 
-    <Style x:Key="AllAppsButtonStyle" TargetType="ToggleButton">
+    <Style x:Key="AllAppsTreeViewStyle" TargetType="{x:Type TreeView}">
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <HierarchicalDataTemplate DataType="{x:Type disk:DiskItem}" ItemsSource="{Binding SubItems}" ItemContainerStyle="{StaticResource {x:Type TreeViewItem}}">
+                    <DockPanel Margin="0,2">
+                        <Canvas Width="16" Height="16" DockPanel.Dock="Left" Margin="0,0,8,0" Background="Gray"/>
+                        <!-->
+                            <Canvas.Background>
+                                <Binding ConverterParameter="16">
+                                    <Binding.Converter>
+                                        <disk:DiskItemToIconImageBrushConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Canvas.Background>
+                        </Canvas-->
+                        <TextBlock Text="{Binding ItemName}" Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}"/>
+                    </DockPanel>
+                </HierarchicalDataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TreeView}">
+                    <Border Margin="7,0,0,0" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,1,1,0" CornerRadius="4,4,0,0">
+                        <Border Margin="1,1,1,0" Background="White" CornerRadius="3,3,0,0">
+                            <ScrollViewer Focusable="False" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AllAppsToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="Black" />
@@ -412,28 +506,28 @@
                             </Rectangle>
                             <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}">
                                 <Grid Margin="{TemplateBinding Padding}">
-                                    <Path x:Name="AllAppsArrow" Data="M 0 0 L 5 5 L 0 10 Z" VerticalAlignment="Center" Margin="10,0" Opacity="1">
+                                    <Path x:Name="AllAppsArrow" Data="M 0 0 L 6 5.5 L 0 11 Z" VerticalAlignment="Center" Margin="2,0" Opacity="1" RenderOptions.EdgeMode="Aliased">
                                         <Path.Fill>
-                                            <LinearGradientBrush StartPoint="0,0.25" EndPoint="1,0">
-                                                <LinearGradientBrush.GradientStops>
+                                            <RadialGradientBrush Center="0,0.625" GradientOrigin="0,0.625" RadiusY="1">
+                                                <RadialGradientBrush.GradientStops>
                                                     <GradientStop Offset="0" Color="#FF999999"/>
-                                                    <GradientStop Offset="0.333333333333" Color="#FF0A0A0A"/>
-                                                </LinearGradientBrush.GradientStops>
-                                            </LinearGradientBrush>
+                                                    <GradientStop Offset="0.375" Color="#FF0A0A0A"/>
+                                                </RadialGradientBrush.GradientStops>
+                                            </RadialGradientBrush>
                                         </Path.Fill>
                                     </Path>
-                                    <Path x:Name="BackArrow" Data="M 5 0 L 0 5 L 5 10 Z" VerticalAlignment="Center" Margin="10,0" Opacity="0">
+                                    <Path x:Name="BackArrow" Data="M 6 0 L 0 5.5 L 6 11 Z" VerticalAlignment="Center" Margin="2,0" Opacity="0" RenderOptions.EdgeMode="Aliased">
                                         <Path.Fill>
-                                            <LinearGradientBrush StartPoint="0,0.25" EndPoint="1,0">
-                                                <LinearGradientBrush.GradientStops>
+                                            <RadialGradientBrush Center="0,0.625" GradientOrigin="0,0.625" RadiusY="1">
+                                                <RadialGradientBrush.GradientStops>
                                                     <GradientStop Offset="0" Color="#FF999999"/>
-                                                    <GradientStop Offset="0.333333333333" Color="#FF0A0A0A"/>
-                                                </LinearGradientBrush.GradientStops>
-                                            </LinearGradientBrush>
+                                                    <GradientStop Offset="0.375" Color="#FF0A0A0A"/>
+                                                </RadialGradientBrush.GradientStops>
+                                            </RadialGradientBrush>
                                         </Path.Fill>
                                     </Path>
                                 </Grid>
-                                <Grid HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="-4,0,6,0">
+                                <Grid HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="15,0">
                                     <ContentControl x:Name="AllAppsControl" Content="All Apps" Focusable="False" IsTabStop="False" Opacity="1"/>
                                     <ContentControl x:Name="BackControl" Content="Bacc" Focusable="False" IsTabStop="False" Opacity="0"/>
                                 </Grid>
@@ -505,6 +599,52 @@
         </Setter>
     </Style>
 
+    <Style x:Key="SearchTextBoxStyle" TargetType="{x:Type TextBox}">
+        <!--Setter Property="Padding" Value="0"/-->
+        <Setter Property="Margin" Value="11,13,15,10"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBoxBase}">
+                    <Border x:Name="AddressBox" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="1" UseLayoutRounding="True" SnapsToDevicePixels="True">
+                        <Border BorderThickness="1" CornerRadius="0.5">
+                            <Border.BorderBrush>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Offset="0.55" Color="#FF616263"/>
+                                        <GradientStop Offset="1" Color="#FFB8BDC4"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </Border.BorderBrush>
+                            <Border Background="#40FFFFFF" BorderBrush="#7FFFFFFF" BorderThickness="1">
+                                <ScrollViewer x:Name="PART_ContentHost" Foreground="#7F000000" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Border>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="False" >
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="PART_ContentHost" Storyboard.TargetProperty="Opacity" To="0.75" Duration="0:0:0.125" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="PART_ContentHost" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.5" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ShutDownLeftButton" TargetType="Button">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Background" Value="Transparent" />
@@ -512,7 +652,7 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Padding" Value="4,0" />
+        <Setter Property="Padding" Value="7,-1,8,1" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
@@ -562,7 +702,7 @@
                                 </Border.BorderBrush>
                             </Border>
                         </Border>
-                        <ContentControl x:Name="ContentControl" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="6,0" Focusable="False" IsTabStop="False" />
+                        <ContentControl x:Name="ContentControl" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" Focusable="False" IsTabStop="False" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -596,7 +736,7 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Padding" Value="4,0" />
+        <Setter Property="Padding" Value="8,0,9,0" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
@@ -668,7 +808,7 @@
                                 </Border.BorderBrush>
                             </Border>
                         </Border>
-                        <ContentControl x:Name="ContentControl" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="6,0" Focusable="False" IsTabStop="False" />
+                        <ContentControl x:Name="ContentControl" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" Focusable="False" IsTabStop="False" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -691,6 +831,20 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Content">
+            <Setter.Value>
+                <Path Data="M 0 0 L 1 0 L 4 3 L 1 6 L 0 6 Z" Stroke="#C0535666" StrokeThickness="1" UseLayoutRounding="True" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased">
+                    <Path.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <LinearGradientBrush.GradientStops>
+                                <GradientStop Offset="0" Color="White"/>
+                                <GradientStop Offset="1" Color="#FFDADADA"/>
+                            </LinearGradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Path.Fill>
+                </Path>
             </Setter.Value>
         </Setter>
     </Style>
@@ -1056,24 +1210,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <Storyboard x:Key="ShowAllApps">
-        <DoubleAnimation Storyboard.TargetName="AllAppsTree" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.125"/>
-        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="AllAppsTree" Storyboard.TargetProperty="Visibility">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-        </ObjectAnimationUsingKeyFrames>
-        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PinnedListView" Storyboard.TargetProperty="Visibility">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0.200" Value="{x:Static Visibility.Hidden}"/>
-        </ObjectAnimationUsingKeyFrames>
-    </Storyboard>
-
-    <Storyboard x:Key="HideAllApps">
-        <DoubleAnimation Storyboard.TargetName="AllAppsTree" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.125"/>
-        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="AllAppsTree" Storyboard.TargetProperty="Visibility">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0.200" Value="{x:Static Visibility.Hidden}"/>
-        </ObjectAnimationUsingKeyFrames>
-        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PinnedListView" Storyboard.TargetProperty="Visibility">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-        </ObjectAnimationUsingKeyFrames>
-    </Storyboard>
 </ResourceDictionary>
