@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:StartbeatMenu"
         mc:Ignorable="d"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="MainWindow" Width="411" Height="506" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" Topmost="True" Background="Transparent" Style="{DynamicResource WindowStyle}">
+        Title="MainWindow" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" Topmost="True" Background="Transparent" Style="{DynamicResource WindowStyle}">
     <local:QuadContentWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,7 +19,7 @@
         <TextBox Margin="11,11,15,10"/>
     </local:QuadContentWindow.SecondContent>
     <local:QuadContentWindow.ThirdContent>
-        <ListView x:Name="PlacesListView" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemContainerStyle="{DynamicResource PlaceListItem}"/>
+        <ListView x:Name="PlacesListView" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PlacesListViewStyle}" ItemsSource="{Binding Places}" SelectionChanged="ListView_SelectionChanged"/>
     </local:QuadContentWindow.ThirdContent>
     <local:QuadContentWindow.FourthContent>
         <DockPanel UseLayoutRounding="True">
@@ -60,7 +60,7 @@
         <DockPanel>
             <ToggleButton x:Name="AllAppsToggleButton" Style="{DynamicResource AllAppsButtonStyle}" Click="AllAppsToggleButton_Click" DockPanel.Dock="Bottom"/>
             <Grid>
-                <ListView x:Name="PinnedListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" ItemContainerStyle="{DynamicResource PinnedProgramListItem}" SelectionChanged="PinnedListView_SelectionChanged"/>
+                <ListView x:Name="PinnedListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" Style="{DynamicResource PinnedItemsListViewStyle}" SelectionChanged="ListView_SelectionChanged"/>
                 <TreeView x:Name="AllAppsTree" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Hidden"/>
             </Grid>
         </DockPanel>

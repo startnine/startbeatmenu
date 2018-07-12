@@ -47,6 +47,8 @@ namespace StartbeatMenu
             {
                 ((MainWindow)Application.Current.MainWindow).Topmost = true;
                 ((MainWindow)Application.Current.MainWindow).Show();
+                ((MainWindow)Application.Current.MainWindow).Focus();
+                ((MainWindow)Application.Current.MainWindow).Activate();
             };
         }
         public IList<IReceiverEntry> Entries => new[] { StartMenuOpenedEntry };

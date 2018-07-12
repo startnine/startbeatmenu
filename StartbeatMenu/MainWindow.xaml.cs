@@ -18,6 +18,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using Start9.Api.Controls;
 using Start9.Api.Tools;
+using Start9.Api.DiskItems;
+using static Start9.Api.SystemContext;
+using static Start9.Api.SystemScaling;
+using static Start9.Api.Extensions;
+using System.Collections.ObjectModel;
 
 namespace StartbeatMenu
 {
@@ -88,13 +93,18 @@ namespace StartbeatMenu
             EasingMode = EasingMode.EaseOut
         };
 
-        public List<IconListViewItem> PinnedItems
+        String _pinnedItemsPath = Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_PinnedApps.txt");
+        String _placesPath = Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_Places.txt");
+
+        public ObservableCollection<DiskItem> PinnedItems
         {
             get
             {
-                var list = new List<IconListViewItem>();
-                foreach(var s in File.ReadAllLines(Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_PinnedApps.txt")))
-                {
+                var list = new ObservableCollection<DiskItem>();
+
+                foreach (var s in File.ReadAllLines(_pinnedItemsPath))
+                    list.Add(new DiskItem(s));
+                /*{
                     var expS = Environment.ExpandEnvironmentVariables(s);
                     var item = new IconListViewItem()
                     {
@@ -105,10 +115,18 @@ namespace StartbeatMenu
                     {
                         item.Icon = new Canvas()
                         {
-                            Background = new ImageBrush(MiscTools.GetIconFromFilePath(expS, 24, 24)),
+                            Background = new SolidColorBrush(Colors.Gray),
                             Width = 24,
                             Height = 24
                         };
+                        try
+                        {
+                            (item.Icon as Canvas).Background = new DiskItemToIconImageBrushConverter().Convert(new DiskItem(expS), null, 24, null) as ImageBrush;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                        }
                     }
                     item.MouseLeftButtonUp += (sneder, args) =>
                     {
@@ -116,34 +134,72 @@ namespace StartbeatMenu
                     };
                     list.Add(item);
                     Debug.WriteLine(expS);
-                }
+                }*/
+
                 return list;
             }
             set
             {
                 List<String> list = new List<String>();
-                foreach (IconListViewItem i in value)
-                {
-                    list.Add(i.Tag.ToString());
-                }
-                File.WriteAllLines(Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_PinnedApps.txt"), list.ToArray());
+
+                foreach (DiskItem i in value)
+                    list.Add(i.ItemPath);
+
+                File.WriteAllLines(_pinnedItemsPath, list.ToArray());
             }
         }
 
-        ToggleButton tempStart;
+        public ObservableCollection<DiskItem> Places
+        {
+            get
+            {
+                var list = new ObservableCollection<DiskItem>();
+
+                foreach (var s in File.ReadAllLines(_placesPath))
+                    list.Add(new DiskItem(s));
+
+                return list;
+            }
+            set
+            {
+                List<String> list = new List<String>();
+
+                foreach (DiskItem i in value)
+                    list.Add(i.ItemPath);
+
+                File.WriteAllLines(_placesPath, list.ToArray());
+            }
+        }
+
+        public enum MenuMode
+        {
+            Normal,
+            AllApps,
+            Search,
+            LeftColumnJumpList
+        }
+
+        public MenuMode CurrentMenuMode
+        {
+            get => (MenuMode)GetValue(CurrentMenuModeProperty);
+            set => SetValue(CurrentMenuModeProperty, value);
+        }
+
+        public static readonly DependencyProperty CurrentMenuModeProperty = DependencyProperty.Register("CurrentMenuMode", typeof(MenuMode), typeof(MainWindow), new PropertyMetadata(MenuMode.Normal, OnCurrentMenuModePropertyChangedCallback));
+
+        public static void OnCurrentMenuModePropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             Application.Current.MainWindow = this;
-            Left = SystemParameters.WorkArea.Left;
-
-            TopAnimatedIn = SystemParameters.WorkArea.Bottom - Height;
-            TopAnimatedOut = TopAnimatedIn + 50;
 
             Deactivated += (sender, e) => Hide();
 
-            foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%userprofile%")))
+            /*foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%userprofile%")))
             {
                 ListViewItem item = new ListViewItem()
                 {
@@ -155,8 +211,30 @@ namespace StartbeatMenu
                 {
                     PlacesListView.Items.Add(item);
                 }
-            }
+            }*/
 
+            PinnedItems.CollectionChanged += Items_CollectionChanged;
+            Places.CollectionChanged += Items_CollectionChanged;
+
+            IsVisibleChanged += MainWindow_IsVisibleChanged;
+        }
+
+        private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsVisible)
+            {
+                var p = CursorPosition;
+                var s = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)(p.X), (int)(p.Y))).WorkingArea;
+                MaxHeight = s.Height;
+                Left = s.Left;
+
+                TopAnimatedIn = s.Bottom - Height;
+                TopAnimatedOut = TopAnimatedIn + 50;
+            }
+        }
+
+        private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
             
         }
 
@@ -238,12 +316,12 @@ namespace StartbeatMenu
             }
         }*/
 
-        private void PinnedListView_SelectionChanged(Object sender, SelectionChangedEventArgs e)
+        private void ListView_SelectionChanged(Object sender, SelectionChangedEventArgs e)
         {
             if ((sender as ListView).SelectedItem != null)
             {
-                var s = ((sender as ListView).SelectedItem as ListViewItem).Tag.ToString();
-                if (File.Exists(s))
+                var s = Environment.ExpandEnvironmentVariables(((sender as ListView).SelectedItem as DiskItem).ItemPath);
+                if (File.Exists(s) || Directory.Exists(s))
                 {
                     Process.Start(s);
                 }
@@ -252,6 +330,7 @@ namespace StartbeatMenu
                     Process.Start("cmd.exe", @"/C " + s);
                 }
                 (sender as ListView).SelectedItem = null;
+                Hide();
             }
         }
 
@@ -281,8 +360,8 @@ namespace StartbeatMenu
 
         private void ShutDownRightButton_Click(Object sender, RoutedEventArgs e)
         {
-            var m = MainTools.GetDpiScaledGlobalControlPosition(ShutDownRightButton);
-            var c = MainTools.GetDpiScaledCursorPosition();
+            var m = ShutDownRightButton.PointToScreenInWpfUnits(new Point(0,0));
+            var c = Start9.Api.SystemScaling.CursorPosition;
             var menu = (sender as Button).ContextMenu;
             menu.HorizontalOffset = ((c.X - m.X) * -1) + ShutDownRightButton.ActualWidth;
             menu.VerticalOffset = ((c.Y - m.Y) * -1) + ShutDownRightButton.ActualHeight;
@@ -310,22 +389,22 @@ namespace StartbeatMenu
 
         private void LogOff_Click(Object sender, RoutedEventArgs e)
         {
-            SystemPowerTools.SignOut();
+            SignOut();
         }
 
         private void Lock_Click(Object sender, RoutedEventArgs e)
         {
-            SystemPowerTools.LockUserAccount();
+            LockUserAccount();
         }
 
         private void Restart_Click(Object sender, RoutedEventArgs e)
         {
-            SystemPowerTools.RestartSystem();
+            RestartSystem();
         }
 
         private void Sleep_Click(Object sender, RoutedEventArgs e)
         {
-            SystemPowerTools.SleepSystem();
+            SleepSystem();
         }
 
         private void Hibernate_Click(Object sender, RoutedEventArgs e)
