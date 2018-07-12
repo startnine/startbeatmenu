@@ -92,12 +92,83 @@
                             </Border>
                             <ContentControl Content="{TemplateBinding FourthContent}" Margin="-1,-3,0,3" HorizontalAlignment="Left" VerticalAlignment="Center" Height="22"/>
                         </Grid>
-                        <Border x:Name="UserImageFrame" Grid.Column="1" Grid.RowSpan="2" Width="58" Height="58" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="#40000000" BorderThickness="1" CornerRadius="4">
-                            <Grid>
-                                <Border Margin="4" CornerRadius="1" BorderBrush="#7F000000" BorderThickness="1" Background="#7FFFFFFF">
-                                    <Rectangle Fill="{x:Static api:SystemContext.UserAvatar}"/>
-                                </Border>
-                                <Border CornerRadius="4"  BorderThickness="1">
+                        <Grid x:Name="UserImageFrame" Grid.Column="1" Grid.RowSpan="2" Width="58" Height="58" HorizontalAlignment="Center" VerticalAlignment="Top">
+                            <Path Stroke="#7F000000" StrokeThickness="1">
+                                <Path.Fill>
+                                    <RadialGradientBrush Center="0.5,0" GradientOrigin="0.5,0" RadiusX="2" RadiusY="1.125">
+                                        <RadialGradientBrush.GradientStops>
+                                            <GradientStop Offset="0" Color="#60FFFFFF"/>
+                                            <GradientStop Offset="0.5" Color="#40FFFFFF"/>
+                                            <GradientStop Offset="0.5" Color="#10FFFFFF"/>
+                                            <GradientStop Offset="1" Color="#20FFFFFF"/>
+                                        </RadialGradientBrush.GradientStops>
+                                    </RadialGradientBrush>
+                                </Path.Fill>
+                                <Path.Data>
+                                    <PathGeometry Figures="M 1.5 6.5 L 3.5 3.5 L 6.5 1.5 L 29 0
+                                                  L 51.5 1.5 L 54.5 3.5 L 56.5 6.5 L 58 29
+                                                  L 56.5 51.5 L 54.5 54.5 L 51.5 56.5 L 29 58
+                                                  L 6.5 56.5 L 3.5 54.5 L 1.5 51.5 L 0 29 Z" FillRule="NonZero"/>
+                                </Path.Data>
+                            </Path>
+                            <Canvas HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,6,-6,-6" Width="58" Height="58">
+                                <Canvas.Background>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Path Fill="Black" Stroke="Transparent" StrokeThickness="4">
+                                                <Path.Data>
+                                                    <PathGeometry Figures="M 1.5 6.5 L 3.5 3.5 L 6.5 1.5 L 29 0
+                                                    L 51.5 1.5 L 54.5 3.5 L 56.5 6.5 L 58 29
+                                                    L 56.5 51.5 L 54.5 54.5 L 51.5 56.5 L 29 58
+                                                    L 6.5 56.5 L 3.5 54.5 L 1.5 51.5 L 0 29 Z" FillRule="NonZero"/>
+                                                </Path.Data>
+                                                <Path.Effect>
+                                                    <BlurEffect Radius="5" KernelType="Gaussian"/>
+                                                </Path.Effect>
+                                            </Path>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Canvas.Background>
+                                <Canvas.OpacityMask>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Grid Background="#01000000" ClipToBounds="True">
+                                                <Path Stroke="Black" StrokeThickness="4" Margin="-4,-4,2,2">
+                                                    <Path.Data>
+                                                        <PathGeometry Figures="M 1.5 6.5 L 3.5 3.5 L 6.5 1.5 L 27 0
+                                                        L 49.5 1.5 L 52.5 3.5 L 54.5 6.5 L 56 27
+                                                        L 54.5 49.5 L 52.5 52.5 L 49.5 54.5 L 27 56
+                                                        L 6.5 54.5 L 3.5 52.5 L 1.5 49.5 L 0 27 Z" FillRule="NonZero"/>
+                                                    </Path.Data>
+                                                    <Path.Effect>
+                                                        <BlurEffect Radius="2" KernelType="Gaussian"/>
+                                                    </Path.Effect>
+                                                </Path>
+                                            </Grid>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Canvas.OpacityMask>
+                            </Canvas>
+                            <Path Margin="1" StrokeThickness="1">
+                                <Path.Stroke>
+                                    <LinearGradientBrush StartPoint="0.125,0.125" EndPoint="0.875,0.875">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Offset="0" Color="#C0FFFFFF"/>
+                                            <GradientStop Offset="1" Color="#C000FFFF"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Path.Stroke>
+                                <Path.Data>
+                                    <PathGeometry Figures="M 1.5 6.5 L 3.5 3.5 L 6.5 1.5 L 27 0
+                                                  L 49.5 1.5 L 52.5 3.5 L 54.5 6.5 L 56 27
+                                                  L 54.5 49.5 L 52.5 52.5 L 49.5 54.5 L 27 56
+                                                  L 6.5 54.5 L 3.5 52.5 L 1.5 49.5 L 0 27 Z" FillRule="NonZero"/>
+                                </Path.Data>
+                            </Path>
+                            <Border Margin="4" CornerRadius="3" BorderBrush="White" BorderThickness="1" Background="{x:Static api:SystemContext.UserAvatar}">
+                                <Border BorderBrush="#7F000000" BorderThickness="1" CornerRadius="2.5"/>
+                            </Border>
+                            <!--Border CornerRadius="4" BorderThickness="1">
                                     <Border.Background>
                                         <RadialGradientBrush Center="0.5,0" GradientOrigin="0.5,0" RadiusX="2" RadiusY="1.125">
                                             <RadialGradientBrush.GradientStops>
@@ -116,9 +187,8 @@
                                             </LinearGradientBrush.GradientStops>
                                         </LinearGradientBrush>
                                     </Border.BorderBrush>
-                                </Border>
-                            </Grid>
-                        </Border>
+                                </Border-->
+                        </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="CurrentMenuMode" Value="Search">
@@ -617,7 +687,7 @@
                                     </LinearGradientBrush.GradientStops>
                                 </LinearGradientBrush>
                             </Border.BorderBrush>
-                            <Border Background="#40FFFFFF" BorderBrush="#7FFFFFFF" BorderThickness="1">
+                            <Border Background="White" BorderBrush="#7FFFFFFF" BorderThickness="1">
                                 <ScrollViewer x:Name="PART_ContentHost" Foreground="#7F000000" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
                             </Border>
                         </Border>
