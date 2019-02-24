@@ -19,6 +19,7 @@
     <OutputPath>$(AppData)\Start9\Pipeline\AddIns\StartbeatMenu</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.0.1" />
     <PackageReference Include="Start9.Api" Version="1.0.0-CI00121" />
   </ItemGroup>
   <ItemGroup>
