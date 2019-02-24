@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using WindowsSharp.DiskItems;
 
 namespace StartbeatMenu
