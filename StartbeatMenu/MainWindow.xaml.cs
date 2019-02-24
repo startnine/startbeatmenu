@@ -16,77 +16,116 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using Start9.Api.Controls;
-using Start9.Api.Tools;
-using Start9.Api.DiskItems;
-using static Start9.Api.SystemContext;
-using static Start9.Api.SystemScaling;
-using static Start9.Api.Extensions;
 using System.Collections.ObjectModel;
+using WindowsSharp.DiskItems;
+using Start9.UI.Wpf.Statics;
+using WindowsSharp.Statics;
+using Start9.UI.Wpf.Windows;
 
 namespace StartbeatMenu
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : QuadContentWindow
+    public partial class MainWindow : ShadowedWindow
     {
-        /*[DllImport("dwmapi.dll")]
-        static extern Int32 DwmIsCompositionEnabled(out Boolean enabled);
-
-        [DllImport("dwmapi.dll")]
-        static extern void DwmEnableBlurBehindWindow(IntPtr hwnd, ref DWM_BLURBEHIND blurBehind);
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct DWM_BLURBEHIND
+        public ObservableCollection<DiskItem> GetAllApps()
         {
-            public DWM_BB dwFlags;
-            public Boolean fEnable;
-            public IntPtr hRgnBlur;
-            public Boolean fTransitionOnMaximized;
+            //ObservableCollection<DiskItem> items = new ObservableCollection<DiskItem>();
 
-            public DWM_BLURBEHIND(Boolean enabled)
+            ObservableCollection<DiskItem> AllAppsAppDataItems = new ObservableCollection<DiskItem>();
+            foreach (var s in Directory.EnumerateFiles(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                fEnable = enabled ? true : false;
-                hRgnBlur = IntPtr.Zero;
-                fTransitionOnMaximized = false;
-                dwFlags = DWM_BB.Enable;
+                AllAppsAppDataItems.Add(new DiskItem(s));
+            }
+            foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs")))
+            {
+                AllAppsAppDataItems.Add(new DiskItem(s));
             }
 
-            public System.Drawing.Region Region
+            ObservableCollection<DiskItem> AllAppsProgramDataItems = new ObservableCollection<DiskItem>();
+            foreach (var s in Directory.EnumerateFiles(Environment.ExpandEnvironmentVariables(@"%programdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                get { return System.Drawing.Region.FromHrgn(hRgnBlur); }
+                AllAppsProgramDataItems.Add(new DiskItem(s));
+            }
+            foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%programdata%\Microsoft\Windows\Start Menu\Programs")))
+            {
+                AllAppsProgramDataItems.Add(new DiskItem(s));
             }
 
-            public Boolean TransitionOnMaximized
+            ObservableCollection<DiskItem> AllAppsItems = new ObservableCollection<DiskItem>();
+            ObservableCollection<DiskItem> AllAppsReorgItems = new ObservableCollection<DiskItem>();
+            foreach (DiskItem t in AllAppsAppDataItems)
             {
-                get { return fTransitionOnMaximized != false; }
-                set
+                var FolderIsDuplicate = false;
+
+                foreach (DiskItem v in AllAppsProgramDataItems)
                 {
-                    fTransitionOnMaximized = value ? true : false;
-                    dwFlags |= DWM_BB.TransitionMaximized;
+                    ObservableCollection<DiskItem> SubItemsList = new ObservableCollection<DiskItem>();
+
+                    if (Directory.Exists(t.ItemPath))
+                    {
+                        if (((t.ItemCategory == DiskItem.DiskItemCategory.Directory) & (v.ItemCategory == DiskItem.DiskItemCategory.Directory)) && ((t.ItemPath.Substring(t.ItemPath.LastIndexOf(@"\"))) == (v.ItemPath.Substring(v.ItemPath.LastIndexOf(@"\")))))
+                        {
+                            FolderIsDuplicate = true;
+                            foreach (var i in Directory.EnumerateDirectories(t.ItemPath))
+                            {
+                                SubItemsList.Add(new DiskItem(i));
+                            }
+
+                            foreach (var j in Directory.EnumerateFiles(v.ItemPath))
+                            {
+                                SubItemsList.Add(new DiskItem(j));
+                            }
+                        }
+                    }
+
+                    if (!AllAppsItems.Contains(v))
+                    {
+                        AllAppsItems.Add(v);
+                    }
+
+                    return SubItemsList;
+                }
+
+                if ((!AllAppsItems.Contains(t)) && (!FolderIsDuplicate))
+                {
+                    AllAppsItems.Add(t);
                 }
             }
 
-            public void SetRegion(System.Drawing.Graphics graphics, System.Drawing.Region region)
+            foreach (DiskItem x in AllAppsItems)
             {
-                hRgnBlur = region.GetHrgn(graphics);
-                dwFlags |= DWM_BB.BlurRegion;
+                if (File.Exists(x.ItemPath))
+                {
+                    AllAppsReorgItems.Add(x);
+                }
             }
+
+            foreach (DiskItem x in AllAppsItems)
+            {
+                if (Directory.Exists(x.ItemPath))
+                {
+                    AllAppsReorgItems.Add(x);
+                }
+            }
+
+            return AllAppsReorgItems;
         }
 
-        [Flags]
-        enum DWM_BB
+        public double RightColumnWidth
         {
-            Enable = 1,
-            BlurRegion = 2,
-            TransitionMaximized = 4
-        }*/
+            get => (double)GetValue(RightColumnWidthProperty);
+            set => SetValue(RightColumnWidthProperty, value);
+        }
+
+        public static readonly DependencyProperty RightColumnWidthProperty =
+            DependencyProperty.Register("RightColumnWidth", typeof(double), typeof(MainWindow), new PropertyMetadata(0.0));
 
         TimeSpan AnimationDuration = TimeSpan.FromMilliseconds(250);
 
-        Double TopAnimatedOut = 0;
-        Double TopAnimatedIn = 0;
+        //Double TopAnimatedOut = 0;
+        //Double TopAnimatedIn = 0;
 
         CircleEase CircleEase = new CircleEase()
         {
@@ -96,7 +135,7 @@ namespace StartbeatMenu
         String _pinnedItemsPath = Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_PinnedApps.txt");
         String _placesPath = Environment.ExpandEnvironmentVariables(@"%appdata%\Start9\TempData\StartbeatMenu_Places.txt");
 
-        public ObservableCollection<DiskItem> PinnedItems
+        /*public ObservableCollection<DiskItem> PinnedItems
         {
             get
             {
@@ -134,7 +173,7 @@ namespace StartbeatMenu
                     };
                     list.Add(item);
                     Debug.WriteLine(expS);
-                }*/
+                }*
 
                 return list;
             }
@@ -147,9 +186,18 @@ namespace StartbeatMenu
 
                 File.WriteAllLines(_pinnedItemsPath, list.ToArray());
             }
+        }*/
+
+        public ObservableCollection<DiskItem> PinnedItems
+        {
+            get => (ObservableCollection<DiskItem>)GetValue(PinnedItemsProperty);
+            set => SetValue(PinnedItemsProperty, value);
         }
 
-        public ObservableCollection<DiskItem> Places
+        public static readonly DependencyProperty PinnedItemsProperty =
+            DependencyProperty.Register("PinnedItems", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
+
+        /*public ObservableCollection<DiskItem> Places
         {
             get
             {
@@ -169,7 +217,25 @@ namespace StartbeatMenu
 
                 File.WriteAllLines(_placesPath, list.ToArray());
             }
+        }*/
+
+        public ObservableCollection<DiskItem> AllApps
+        {
+            get => (ObservableCollection<DiskItem>)GetValue(AllAppsProperty);
+            set => SetValue(AllAppsProperty, value);
         }
+
+        public static readonly DependencyProperty AllAppsProperty =
+            DependencyProperty.Register("AllApps", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
+
+        public ObservableCollection<DiskItem> Places
+        {
+            get => (ObservableCollection<DiskItem>)GetValue(PlacesProperty);
+            set => SetValue(PlacesProperty, value);
+        }
+
+        public static readonly DependencyProperty PlacesProperty =
+            DependencyProperty.Register("Places", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
 
         public enum MenuMode
         {
@@ -223,7 +289,7 @@ namespace StartbeatMenu
             else
             {
                 main.PinnedAppsListView.Visibility = Visibility.Visible;
-                main.AllAppsTreeView.Visibility = Visibility.Hidden;
+                main.AllAppsTreeView.Visibility = Visibility.Collapsed;
                 if (main.AllAppsToggleButton.IsChecked != false)
                 {
                     main.AllAppsToggleButton.IsChecked = false;
@@ -234,44 +300,77 @@ namespace StartbeatMenu
         public MainWindow()
         {
             InitializeComponent();
-            Application.Current.MainWindow = this;
+            //Application.Current.MainWindow = this;
 
-            Deactivated += (sender, e) => Hide();
+            //Deactivated += (sender, e) => Hide();
+            GetItems();
 
-            AllAppsTreeView.ItemsSource = DiskItem.AllApps;
+            //AllAppsTreeView.ItemsSource = DiskItem.AllApps;
 
             PinnedItems.CollectionChanged += Items_CollectionChanged;
             Places.CollectionChanged += Items_CollectionChanged;
 
-            IsVisibleChanged += MainWindow_IsVisibleChanged;
+
+            //Module.MessageReceived += Module_MessageReceived;
+            //Show();
         }
 
-        public void DisplayMenu()
+        void GetItems()
         {
-            Topmost = true;
-            Show();
-            Focus();
-            Activate();
-            SearchTextBox.Focus();
-        }
-
-        private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (IsVisible)
+            //AllApps.Add(new DiskItem(Environment.ExpandEnvironmentVariables(@"%userprofile%\Documents")));
+            //AllApps = GetAllApps();
+            var appData = new DiskItem(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs"));
+            int lastDirectoryIndex = -1;
+            foreach (DiskItem d in appData.SubItems)
             {
-                var p = CursorPosition;
-                var s = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)(p.X), (int)(p.Y))).WorkingArea;
-                MaxHeight = s.Height;
-                Left = s.Left;
-
-                TopAnimatedIn = s.Bottom - Height;
-                TopAnimatedOut = TopAnimatedIn + 50;
+                if (d.ItemCategory == DiskItem.DiskItemCategory.Directory)
+                {
+                    AllApps.Insert(lastDirectoryIndex + 1, d);
+                    lastDirectoryIndex++;
+                }
+                else
+                    AllApps.Add(d);
             }
+
+            foreach (var s in File.ReadAllLines(_pinnedItemsPath))
+                PinnedItems.Add(new DiskItem(s));
+
+            foreach (var s in File.ReadAllLines(_placesPath))
+                Places.Add(new DiskItem(s));
+        }
+
+        void SaveItems()
+        {
+            string[] pinnedWriteList = new string[PinnedItems.Count];
+            for (int i = 0; i < PinnedItems.Count; i++)
+                pinnedWriteList[i] = PinnedItems.ElementAt(i).ItemPath;
+            File.WriteAllLines(_pinnedItemsPath, pinnedWriteList.ToArray());
+
+            string[] placesWriteList = new string[Places.Count];
+            for (int i = 0; i < Places.Count; i++)
+                placesWriteList[i] = Places.ElementAt(i).ItemPath;
+            File.WriteAllLines(_placesPath, placesWriteList.ToArray());
+        }
+
+        private void Module_MessageReceived(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                //MessageBox.Show("MESSAGE RECEIVED BY STARTBEATMENU");
+                DisplayMenu();
+                //Background = new SolidColorBrush(Colors.Red);
+            }));
         }
 
         private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            
+            if (sender is ObservableCollection<DiskItem>)
+            {
+                foreach (DiskItem d in (sender as ObservableCollection<DiskItem>))
+                {
+                    Debug.WriteLine("PATH: " + d.ItemPath);
+                }
+            }
         }
 
         /*protected override void OnSourceInitialized(EventArgs e)
@@ -295,12 +394,19 @@ namespace StartbeatMenu
             }
         }*/
 
-        new public void Show()
+        public void DisplayMenu()
         {
-            base.Show();
+            Topmost = false;
+            Topmost = true;
+            Show();
+            Focus();
+            Activate();
+
+            SearchTextBox.Focus();
+            UpdatePosition();
             //Visibility = Visibility.Visible;
 
-            DoubleAnimation opacityAnimation = new DoubleAnimation()
+            /*DoubleAnimation opacityAnimation = new DoubleAnimation()
             {
                 Duration = AnimationDuration,
                 EasingFunction = CircleEase,
@@ -314,14 +420,23 @@ namespace StartbeatMenu
                 EasingFunction = CircleEase,
                 From = TopAnimatedOut,
                 To = TopAnimatedIn
-            };
+            };*/
 
-            BeginAnimation(MainWindow.OpacityProperty, opacityAnimation);
-            BeginAnimation(MainWindow.TopProperty, topAnimation);
+            //BeginAnimation(MainWindow.OpacityProperty, opacityAnimation);
+            //BeginAnimation(MainWindow.TopProperty, topAnimation);
         }
 
-        new public void Hide()
-        {   
+        public void UpdatePosition()
+        {
+            var p = SystemScaling.CursorPosition;
+            var s = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)(p.X), (int)(p.Y))).WorkingArea;
+            //MaxHeight = s.Height;
+            Left = s.Left;
+            Top = s.Bottom - ActualHeight;
+        }
+
+        /*new public void Hide()
+        {
             DoubleAnimation opacityAnimation = new DoubleAnimation()
             {
                 Duration = AnimationDuration,
@@ -341,14 +456,14 @@ namespace StartbeatMenu
 
             BeginAnimation(MainWindow.OpacityProperty, opacityAnimation);
             BeginAnimation(MainWindow.TopProperty, topAnimation);
-        }
+        }*/
 
         /*private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             //throw new NotImplementedException();
             if (Visibility == Visibility.Visible)
             {
-                
+
             }
         }*/
 
@@ -358,16 +473,17 @@ namespace StartbeatMenu
             if (l.SelectedItem != null)
             {
                 var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DiskItem).ItemPath);
-                if (File.Exists(s) || Directory.Exists(s))
+                /*if (File.Exists(s) || Directory.Exists(s))
                 {
                     Process.Start(s);
                 }
                 else
                 {
                     Process.Start("cmd.exe", @"/C " + s);
-                }
+                }*/
+                (l.SelectedItem as DiskItem).Open();
                 l.SelectedItem = null;
-                Hide();
+                //////Hide(); a
             }
         }
 
@@ -386,7 +502,7 @@ namespace StartbeatMenu
                     Process.Start("cmd.exe", @"/C " + s);
                 }
                 l.SelectedValuePath = null;
-                Hide();
+                //////Hide(); a
             }
         }
 
@@ -419,31 +535,36 @@ namespace StartbeatMenu
         {
             if ((sender as ContextMenu).Visibility == Visibility.Visible)
             {
-                
+
             }
             else
             {
-                
+
             }
         }
 
         private void ShutDownRightButton_Click(Object sender, RoutedEventArgs e)
         {
-            var m = ShutDownRightButton.PointToScreenInWpfUnits(new Point(0,0));
-            var c = Start9.Api.SystemScaling.CursorPosition;
+            /*var m = ShutDownRightButton.PointToScreen(new Point(0, 0));
+            var c = SystemScaling.CursorPosition;*/
             var menu = (sender as Button).ContextMenu;
-            menu.HorizontalOffset = ((c.X - m.X) * -1) + ShutDownRightButton.ActualWidth;
+            /*menu.HorizontalOffset = ((c.X - m.X) * -1) + ShutDownRightButton.ActualWidth;
             menu.VerticalOffset = ((c.Y - m.Y) * -1) + ShutDownRightButton.ActualHeight;
             menu.IsOpen = true;
             menu.HorizontalOffset = ((c.X - m.X) * -1) + ShutDownRightButton.ActualWidth;
-            menu.VerticalOffset = ((c.Y - m.Y) * -1) + ShutDownRightButton.ActualHeight;
+            menu.VerticalOffset = ((c.Y - m.Y) * -1) + ShutDownRightButton.ActualHeight;*/
+            //(sender as Button).contextm
+            menu.PlacementTarget = sender as Button;
+            menu.Placement = PlacementMode.Right;
+            /*menu.HorizontalOffset = 0;
+            menu.VerticalOffset = 0;*/
             menu.IsOpen = true;
             ShutDownRightButton.IsEnabled = false;
         }
 
         private void ContextMenu_ContextMenuClosing(Object sender, ContextMenuEventArgs e)
         {
-            
+
         }
 
         private void ContextMenu_Closed(Object sender, RoutedEventArgs e)
@@ -453,32 +574,81 @@ namespace StartbeatMenu
 
         private void SwitchUser_Click(Object sender, RoutedEventArgs e)
         {
-            //AAAAA
+
         }
 
         private void LogOff_Click(Object sender, RoutedEventArgs e)
         {
-            SignOut();
+            SystemContext.Instance.SignOut();
         }
 
         private void Lock_Click(Object sender, RoutedEventArgs e)
         {
-            LockUserAccount();
+            SystemContext.Instance.LockUserAccount();
         }
 
         private void Restart_Click(Object sender, RoutedEventArgs e)
         {
-            RestartSystem();
+            SystemContext.Instance.RestartSystem();
         }
 
         private void Sleep_Click(Object sender, RoutedEventArgs e)
         {
-            SleepSystem();
+            SystemContext.Instance.SleepSystem();
         }
 
         private void Hibernate_Click(Object sender, RoutedEventArgs e)
         {
-            //BBBBB
+
+        }
+
+        private void ListView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        /*private void PlacesOpenMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var ownerListItem = ((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as FrameworkElement).TemplatedParent as FrameworkElement).TemplatedParent as FrameworkElement;
+            Places[(VisualTreeHelper.GetParent(ownerListItem) as Panel).Children.IndexOf(ownerListItem)].Open();
+            //////Hide(); a
+        }
+
+        private void PlacesRemoveMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var ownerListItem = ((((sender as MenuItem).Parent as ContextMenu).PlacementTarget as FrameworkElement).TemplatedParent as FrameworkElement).TemplatedParent as FrameworkElement;
+            Places.RemoveAt((VisualTreeHelper.GetParent(ownerListItem) as Panel).Children.IndexOf(ownerListItem));
+        }*/
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdatePosition();
+        }
+
+        private void PinnedItemsListView_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string s in files)
+                {
+                    if (!Directory.Exists(s))
+                        PinnedItems.Add(new DiskItem(s));
+                }
+            }
+        }
+
+        private void PlacesListView_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string s in files)
+                {
+                    if (Directory.Exists(s))
+                        Places.Add(new DiskItem(s));
+                }
+            }
         }
     }
 }

@@ -12,5 +12,16 @@ namespace StartbeatMenu
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            MainWindow = new MainWindow();
+            ShowMenu();
+        }
+
+        void ShowMenu()
+        {
+            var win = MainWindow as MainWindow;
+            win.DisplayMenu();
+        }
     }
 }

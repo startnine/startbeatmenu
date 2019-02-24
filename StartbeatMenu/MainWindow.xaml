@@ -1,42 +1,61 @@
-﻿<local:QuadContentWindow x:Class="StartbeatMenu.MainWindow"
+﻿<win:ShadowedWindow x:Class="StartbeatMenu.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:apictrl="clr-namespace:Start9.Api.Controls;assembly=Start9.Api"
+        xmlns:ui="clr-namespace:Start9.UI.Wpf;assembly=Start9.UI.Wpf"
+        xmlns:win="clr-namespace:Start9.UI.Wpf.Windows;assembly=Start9.UI.Wpf"
         xmlns:local="clr-namespace:StartbeatMenu"
         mc:Ignorable="d"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="MainWindow" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" Topmost="True" Background="Transparent" Style="{DynamicResource WindowStyle}">
-    <local:QuadContentWindow.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/StartbeatMenu;component/DefaultSkin.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </local:QuadContentWindow.Resources>
-    <local:QuadContentWindow.SecondContent>
-        <TextBox x:Name="SearchTextBox" Style="{DynamicResource SearchTextBoxStyle}" TextChanged="SearchTextBox_TextChanged"/>
-    </local:QuadContentWindow.SecondContent>
-    <local:QuadContentWindow.ThirdContent>
-        <ListView x:Name="PlacesListView" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PlacesListViewStyle}" ItemsSource="{Binding Places}" SelectionChanged="ListView_SelectionChanged"/>
-    </local:QuadContentWindow.ThirdContent>
-    <local:QuadContentWindow.FourthContent>
-        <DockPanel UseLayoutRounding="True" HorizontalAlignment="Left">
+        Title="MainWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStyle="None" Topmost="True" Background="Transparent" SizeChanged="MainWindow_SizeChanged">
+    <!--Style="{DynamicResource WindowStyle}"-->
+    <win:ShadowedWindow.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Settings"/>
+        </ContextMenu>
+    </win:ShadowedWindow.ContextMenu>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!--Grid.Column="0" Grid.Row="0"-->
+        <ListView x:Name="SearchListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PinnedItemsListViewStyle}" Visibility="Hidden" Grid.Column="0" Grid.Row="0" SelectionChanged="ListView_SelectionChanged"/>
+        <DockPanel x:Name="FixedAppListsDockPanel" Grid.Column="0" Grid.Row="0">
+            <ToggleButton x:Name="AllAppsToggleButton" Style="{DynamicResource AllAppsToggleButtonStyle}" Click="AllAppsToggleButton_Click" DockPanel.Dock="Bottom"/>
+            <Grid>
+                <ListView x:Name="PinnedAppsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" Style="{DynamicResource PinnedItemsListViewStyle}" SelectionChanged="ListView_SelectionChanged"/>
+                <TreeView x:Name="AllAppsTreeView" ItemsSource="{Binding AllApps}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="{Binding ActualWidth, ElementName=PinnedAppsListView}" MaxHeight="{Binding ActualHeight, ElementName=PinnedAppsListView}" Style="{DynamicResource AllAppsTreeViewStyle}" Visibility="Collapsed" SelectedItemChanged="TreeView_SelectionChanged"/>
+            </Grid>
+        </DockPanel>
+
+        <!--Grid.Column="1" Grid.Row="0"-->
+        <ListView x:Name="PlacesListView" VerticalAlignment="Stretch" Style="{DynamicResource PlacesListViewStyle}" ItemsSource="{Binding Places}" AllowDrop="True" Grid.Column="1" Grid.Row="0" SelectionChanged="ListView_SelectionChanged" PreviewMouseRightButtonDown="ListView_PreviewMouseRightButtonDown" Drop="PlacesListView_Drop"/>
+        
+        <!--Grid.Column="0" Grid.Row="1"-->
+        <TextBox x:Name="SearchTextBox" Style="{DynamicResource SearchTextBoxStyle}" Grid.Column="0" Grid.Row="1" TextChanged="SearchTextBox_TextChanged"/>
+        
+        <!--Grid.Column="1" Grid.Row="1"-->
+        <DockPanel HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1">
             <!--Grid DockPanel.Dock="Right">
                 <Rectangle x:Name="ShutDownRightButtonSizingAid" Fill="Transparent" Stroke="Transparent" StrokeThickness="0"/-->
-            <Button x:Name="ShutDownRightButton" DockPanel.Dock="Right" Style="{DynamicResource ShutDownRightButton}" Click="ShutDownRightButton_Click">
+            <Button x:Name="ShutDownRightButton" DockPanel.Dock="Right" Style="{DynamicResource ShutDownRightButtonStyle}" Click="ShutDownRightButton_Click">
                 <Button.ContextMenu>
                     <!--Placement="RelativePoint" PlacementTarget="{x:Reference Name=ShutDownRightButton}" HorizontalOffset="{Binding ActualWidth, Source={x:Reference Name=ShutDownRightButtonSizingAid}}" VerticalOffset="{Binding ActualHeight, Source={x:Reference Name=ShutDownRightButtonSizingAid}}"-->
-                    <apictrl:TouchableContextMenu Style="{StaticResource {x:Type apictrl:TouchableContextMenu}}" ContextMenuClosing="ContextMenu_ContextMenuClosing" Closed="ContextMenu_Closed">
-                        <ContextMenu.ItemContainerStyle>
+                    <ContextMenu ContextMenuClosing="ContextMenu_ContextMenuClosing" Closed="ContextMenu_Closed">
+                        <!--ContextMenu.ItemContainerStyle>
                             <Style TargetType="{x:Type Control}">
                                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="Margin" Value="0"/>
                                 <Setter Property="MaxHeight" Value="20"/>
                             </Style>
-                        </ContextMenu.ItemContainerStyle>
+                        </ContextMenu.ItemContainerStyle-->
                         <ContextMenu.Items>
                             <MenuItem x:Name="SwitchUser" Header="Switch user" Click="SwitchUser_Click"/>
                             <MenuItem x:Name="LogOff" Header="Log off" Click="LogOff_Click"/>
@@ -47,22 +66,11 @@
                             <MenuItem x:Name="Sleep" Header="Sleep" Click="Sleep_Click"/>
                             <MenuItem x:Name="Hibernate" Header="Hibernate" Click="Hibernate_Click"/>
                         </ContextMenu.Items>
-                    </apictrl:TouchableContextMenu>
+                    </ContextMenu>
                 </Button.ContextMenu>
             </Button>
             <!--/Grid-->
-            <Button Style="{DynamicResource ShutDownLeftButton}">Shut down</Button>
-        </DockPanel>
-    </local:QuadContentWindow.FourthContent>
-
-    <Grid>
-        <ListView x:Name="SearchListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource PinnedItemsListViewStyle}" Visibility="Hidden" SelectionChanged="ListView_SelectionChanged"/>
-        <DockPanel x:Name="FixedAppListsDockPanel">
-            <ToggleButton x:Name="AllAppsToggleButton" Style="{DynamicResource AllAppsToggleButtonStyle}" Click="AllAppsToggleButton_Click" DockPanel.Dock="Bottom"/>
-            <Grid>
-                <ListView x:Name="PinnedAppsListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding PinnedItems}" Style="{DynamicResource PinnedItemsListViewStyle}" SelectionChanged="ListView_SelectionChanged"/>
-                <TreeView x:Name="AllAppsTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource AllAppsTreeViewStyle}" Visibility="Hidden" SelectedItemChanged="TreeView_SelectionChanged"/>
-            </Grid>
+            <Button Style="{DynamicResource ShutDownLeftButtonStyle}">Shut down</Button>
         </DockPanel>
     </Grid>
-</local:QuadContentWindow>
+</win:ShadowedWindow>

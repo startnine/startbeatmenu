@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Start9.UI.Wpf.Windows;
+using System;
 using System.Windows;
 
 namespace StartbeatMenu
 {
-    public class QuadContentWindow : Window
+    public class QuadContentWindow : ShadowedWindow
     {
         public QuadContentWindow()
         {
