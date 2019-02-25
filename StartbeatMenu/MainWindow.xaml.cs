@@ -17,7 +17,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Collections.ObjectModel;
-using WindowsSharp.DiskItems;
+//using WindowsSharp.DiskItems;
 using Start9.UI.Wpf.Statics;
 using WindowsSharp.Statics;
 using Start9.UI.Wpf.Windows;
@@ -29,53 +29,51 @@ namespace StartbeatMenu
     /// </summary>
     public partial class MainWindow : ShadowedWindow
     {
-        public ObservableCollection<DiskItem> GetAllApps()
+        public ObservableCollection<FileSystemInfo> GetAllApps()
         {
-            //ObservableCollection<DiskItem> items = new ObservableCollection<DiskItem>();
-
-            ObservableCollection<DiskItem> AllAppsAppDataItems = new ObservableCollection<DiskItem>();
+            ObservableCollection<FileSystemInfo> AllAppsAppDataItems = new ObservableCollection<FileSystemInfo>();
             foreach (var s in Directory.EnumerateFiles(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                AllAppsAppDataItems.Add(new DiskItem(s));
+                AllAppsAppDataItems.Add(new FileInfo(Environment.ExpandEnvironmentVariables(s)));
             }
             foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                AllAppsAppDataItems.Add(new DiskItem(s));
+                AllAppsAppDataItems.Add(new DirectoryInfo(Environment.ExpandEnvironmentVariables(s)));
             }
 
-            ObservableCollection<DiskItem> AllAppsProgramDataItems = new ObservableCollection<DiskItem>();
+            ObservableCollection<FileSystemInfo> AllAppsProgramDataItems = new ObservableCollection<FileSystemInfo>();
             foreach (var s in Directory.EnumerateFiles(Environment.ExpandEnvironmentVariables(@"%programdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                AllAppsProgramDataItems.Add(new DiskItem(s));
+                AllAppsProgramDataItems.Add(new FileInfo(Environment.ExpandEnvironmentVariables(s)));
             }
             foreach (var s in Directory.EnumerateDirectories(Environment.ExpandEnvironmentVariables(@"%programdata%\Microsoft\Windows\Start Menu\Programs")))
             {
-                AllAppsProgramDataItems.Add(new DiskItem(s));
+                AllAppsProgramDataItems.Add(new DirectoryInfo(Environment.ExpandEnvironmentVariables(s)));
             }
 
-            ObservableCollection<DiskItem> AllAppsItems = new ObservableCollection<DiskItem>();
-            ObservableCollection<DiskItem> AllAppsReorgItems = new ObservableCollection<DiskItem>();
-            foreach (DiskItem t in AllAppsAppDataItems)
+            ObservableCollection<FileSystemInfo> AllAppsItems = new ObservableCollection<FileSystemInfo>();
+            ObservableCollection<FileSystemInfo> AllAppsReorgItems = new ObservableCollection<FileSystemInfo>();
+            foreach (FileSystemInfo t in AllAppsAppDataItems)
             {
                 var FolderIsDuplicate = false;
 
-                foreach (DiskItem v in AllAppsProgramDataItems)
+                foreach (FileSystemInfo v in AllAppsProgramDataItems)
                 {
-                    ObservableCollection<DiskItem> SubItemsList = new ObservableCollection<DiskItem>();
+                    ObservableCollection<FileSystemInfo> SubItemsList = new ObservableCollection<FileSystemInfo>();
 
-                    if (Directory.Exists(t.ItemPath))
+                    if (Directory.Exists(t.FullName))
                     {
-                        if (((t.ItemCategory == DiskItem.DiskItemCategory.Directory) & (v.ItemCategory == DiskItem.DiskItemCategory.Directory)) && ((t.ItemPath.Substring(t.ItemPath.LastIndexOf(@"\"))) == (v.ItemPath.Substring(v.ItemPath.LastIndexOf(@"\")))))
+                        if (((t is DirectoryInfo) & (v is DirectoryInfo)) && ((t.FullName.Substring(t.FullName.LastIndexOf(@"\"))) == (v.FullName.Substring(v.FullName.LastIndexOf(@"\")))))
                         {
                             FolderIsDuplicate = true;
-                            foreach (var i in Directory.EnumerateDirectories(t.ItemPath))
+                            foreach (var i in Directory.EnumerateDirectories(t.FullName))
                             {
-                                SubItemsList.Add(new DiskItem(i));
+                                SubItemsList.Add(new DirectoryInfo(Environment.ExpandEnvironmentVariables(i)));
                             }
 
-                            foreach (var j in Directory.EnumerateFiles(v.ItemPath))
+                            foreach (var j in Directory.EnumerateFiles(v.FullName))
                             {
-                                SubItemsList.Add(new DiskItem(j));
+                                SubItemsList.Add(new FileInfo(Environment.ExpandEnvironmentVariables(j)));
                             }
                         }
                     }
@@ -94,21 +92,27 @@ namespace StartbeatMenu
                 }
             }
 
-            foreach (DiskItem x in AllAppsItems)
+            int dirIndex = 0;
+            foreach (FileSystemInfo x in AllAppsItems)
             {
-                if (File.Exists(x.ItemPath))
+                if (x is FileInfo)//File.Exists(x.ItemPath))
                 {
                     AllAppsReorgItems.Add(x);
+                    dirIndex++;
+                }
+                else if (x is DirectoryInfo)
+                {
+                    AllAppsReorgItems.Insert(dirIndex, x);
                 }
             }
 
-            foreach (DiskItem x in AllAppsItems)
+            /*foreach (FileSystemInfo x in AllAppsItems)
             {
                 if (Directory.Exists(x.ItemPath))
                 {
                     AllAppsReorgItems.Add(x);
                 }
-            }
+            }*/
 
             return AllAppsReorgItems;
         }
@@ -188,14 +192,14 @@ namespace StartbeatMenu
             }
         }*/
 
-        public ObservableCollection<DiskItem> PinnedItems
+        public ObservableCollection<FileSystemInfo> PinnedItems
         {
-            get => (ObservableCollection<DiskItem>)GetValue(PinnedItemsProperty);
+            get => (ObservableCollection<FileSystemInfo>)GetValue(PinnedItemsProperty);
             set => SetValue(PinnedItemsProperty, value);
         }
 
         public static readonly DependencyProperty PinnedItemsProperty =
-            DependencyProperty.Register("PinnedItems", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
+            DependencyProperty.Register("PinnedItems", typeof(ObservableCollection<FileSystemInfo>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<FileSystemInfo>()));
 
         /*public ObservableCollection<DiskItem> Places
         {
@@ -219,23 +223,23 @@ namespace StartbeatMenu
             }
         }*/
 
-        public ObservableCollection<DiskItem> AllApps
+        public ObservableCollection<FileSystemInfo> AllApps
         {
-            get => (ObservableCollection<DiskItem>)GetValue(AllAppsProperty);
+            get => (ObservableCollection<FileSystemInfo>)GetValue(AllAppsProperty);
             set => SetValue(AllAppsProperty, value);
         }
 
         public static readonly DependencyProperty AllAppsProperty =
-            DependencyProperty.Register("AllApps", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
+            DependencyProperty.Register("AllApps", typeof(ObservableCollection<FileSystemInfo>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<FileSystemInfo>()));
 
-        public ObservableCollection<DiskItem> Places
+        public ObservableCollection<DirectoryInfo> Places
         {
-            get => (ObservableCollection<DiskItem>)GetValue(PlacesProperty);
+            get => (ObservableCollection<DirectoryInfo>)GetValue(PlacesProperty);
             set => SetValue(PlacesProperty, value);
         }
 
         public static readonly DependencyProperty PlacesProperty =
-            DependencyProperty.Register("Places", typeof(ObservableCollection<DiskItem>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DiskItem>()));
+            DependencyProperty.Register("Places", typeof(ObservableCollection<DirectoryInfo>), typeof(MainWindow), new PropertyMetadata(new ObservableCollection<DirectoryInfo>()));
 
         public enum MenuMode
         {
@@ -319,11 +323,11 @@ namespace StartbeatMenu
         {
             //AllApps.Add(new DiskItem(Environment.ExpandEnvironmentVariables(@"%userprofile%\Documents")));
             //AllApps = GetAllApps();
-            var appData = new DiskItem(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs"));
+            var appData = new DirectoryInfo(Environment.ExpandEnvironmentVariables(@"%appdata%\Microsoft\Windows\Start Menu\Programs"));
             int lastDirectoryIndex = -1;
-            foreach (DiskItem d in appData.SubItems)
+            foreach (FileSystemInfo d in appData.EnumerateFileSystemInfos())
             {
-                if (d.ItemCategory == DiskItem.DiskItemCategory.Directory)
+                if (d is DirectoryInfo)
                 {
                     AllApps.Insert(lastDirectoryIndex + 1, d);
                     lastDirectoryIndex++;
@@ -333,22 +337,22 @@ namespace StartbeatMenu
             }
 
             foreach (var s in File.ReadAllLines(_pinnedItemsPath))
-                PinnedItems.Add(new DiskItem(s));
+                PinnedItems.Add(new FileInfo(Environment.ExpandEnvironmentVariables(s)));
 
             foreach (var s in File.ReadAllLines(_placesPath))
-                Places.Add(new DiskItem(s));
+                Places.Add(new DirectoryInfo(Environment.ExpandEnvironmentVariables(s)));
         }
 
         void SaveItems()
         {
             string[] pinnedWriteList = new string[PinnedItems.Count];
             for (int i = 0; i < PinnedItems.Count; i++)
-                pinnedWriteList[i] = PinnedItems.ElementAt(i).ItemPath;
+                pinnedWriteList[i] = PinnedItems.ElementAt(i).FullName;
             File.WriteAllLines(_pinnedItemsPath, pinnedWriteList.ToArray());
 
             string[] placesWriteList = new string[Places.Count];
             for (int i = 0; i < Places.Count; i++)
-                placesWriteList[i] = Places.ElementAt(i).ItemPath;
+                placesWriteList[i] = Places.ElementAt(i).FullName;
             File.WriteAllLines(_placesPath, placesWriteList.ToArray());
         }
 
@@ -364,11 +368,11 @@ namespace StartbeatMenu
 
         private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (sender is ObservableCollection<DiskItem>)
+            if (sender is ObservableCollection<FileSystemInfo>)
             {
-                foreach (DiskItem d in (sender as ObservableCollection<DiskItem>))
+                foreach (FileSystemInfo d in (sender as ObservableCollection<FileSystemInfo>))
                 {
-                    Debug.WriteLine("PATH: " + d.ItemPath);
+                    Debug.WriteLine("PATH: " + d.FullName);
                 }
             }
         }
@@ -472,7 +476,7 @@ namespace StartbeatMenu
             var l = (sender as ListView);
             if (l.SelectedItem != null)
             {
-                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DiskItem).ItemPath);
+                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DirectoryInfo).FullName);
                 /*if (File.Exists(s) || Directory.Exists(s))
                 {
                     Process.Start(s);
@@ -481,7 +485,7 @@ namespace StartbeatMenu
                 {
                     Process.Start("cmd.exe", @"/C " + s);
                 }*/
-                (l.SelectedItem as DiskItem).Open();
+                Process.Start((l.SelectedItem as DirectoryInfo).FullName);
                 l.SelectedItem = null;
                 //////Hide(); a
             }
@@ -492,7 +496,7 @@ namespace StartbeatMenu
             var l = (sender as TreeView);
             if (l.SelectedItem != null)
             {
-                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as DiskItem).ItemPath);
+                var s = Environment.ExpandEnvironmentVariables((l.SelectedItem as FileSystemInfo).FullName);
                 if (File.Exists(s) || Directory.Exists(s))
                 {
                     Process.Start(s);
@@ -633,7 +637,7 @@ namespace StartbeatMenu
                 foreach (string s in files)
                 {
                     if (!Directory.Exists(s))
-                        PinnedItems.Add(new DiskItem(s));
+                        PinnedItems.Add(new FileInfo(Environment.ExpandEnvironmentVariables(s)));
                 }
             }
         }
@@ -646,7 +650,7 @@ namespace StartbeatMenu
                 foreach (string s in files)
                 {
                     if (Directory.Exists(s))
-                        Places.Add(new DiskItem(s));
+                        Places.Add(new DirectoryInfo(Environment.ExpandEnvironmentVariables(s)));
                 }
             }
         }

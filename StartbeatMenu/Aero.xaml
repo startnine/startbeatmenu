@@ -5,22 +5,21 @@
                     xmlns:conv="clr-namespace:Start9.UI.Wpf.Converters;assembly=Start9.UI.Wpf"
                     xmlns:winstat="clr-namespace:WindowsSharp.Statics;assembly=WindowsSharp"
                     xmlns:disk="clr-namespace:WindowsSharp.DiskItems;assembly=WindowsSharp"
+                    xmlns:io="clr-namespace:System.IO;assembly=System.IO.FileSystem"
                     xmlns:e="http://schemas.microsoft.com/xaml/behaviors">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Aero;component/themes/Aero.NormalColor.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Start9.UI.Wpf;component/Themes/Aero.NormalColor.xaml"/>
     </ResourceDictionary.MergedDictionaries>
-    <!--ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/PresentationFramework.Aero, Version=4.0.0.0,Culture=neutral, PublicKeyToken=31bf3856ad364e35,ProcessorArchitecture=MSIL;component/themes/Aero.NormalColor.xaml"/>
-    </ResourceDictionary.MergedDictionaries-->
-
+    
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     <conv:IconToImageBrushConverter x:Key="IconToImageBrushConverter"/>
     <conv:SysDrawingImageToImageBrushConverter x:Key="SysDrawingImageToImageBrushConverter"/>
     <conv:ThicknessToDoubleConverter x:Key="ThicknessToDoubleConverter"/>
+    <local:FileSystemInfoToContentsCollectionConverter x:Key="FileSystemInfoToContentsCollectionConverter"/>
 
     <Style x:Key="{x:Type local:MainWindow}" TargetType="{x:Type local:MainWindow}">
-        <Setter Property="FontFamily" Value="Selawik"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="CompositionState" Value="Glass"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Width" Value="411"/>
@@ -47,8 +46,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:MainWindow}">
                     <Grid Background="{TemplateBinding Background}">
-                        <!--{Binding RightColumnWidth, RelativeSource={RelativeSource Mode=TemplatedParent}, Mode=OneWay, FallbackValue=0}-->
-                        <!--Border Background="Transparent" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="4"-->
                         <Border BorderBrush="#A6000000" BorderThickness="1" CornerRadius="7,7,0,0">
                             <Border BorderThickness="1" CornerRadius="6,6,0,0">
                                 <Border.BorderBrush>
@@ -257,16 +254,6 @@
                                             </LinearGradientBrush>
                                         </Border.Background>
                                     </Border>
-                                    <!--Rectangle x:Name="Shine" Margin="-27,0,-58,0" Width="300" HorizontalAlignment="Right" VerticalAlignment="Stretch">
-                                <Rectangle.Fill>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <LinearGradientBrush.GradientStops>
-                                            <GradientStop Offset="0" Color="#C0FFFFFF"/>
-                                            <GradientStop Offset="1" Color="#40FFFFFF"/>
-                                        </LinearGradientBrush.GradientStops>
-                                    </LinearGradientBrush>
-                                </Rectangle.Fill>
-                            </Rectangle-->
                                     <Grid Margin="{TemplateBinding Padding}">
                                         <ContentPresenter x:Name="PART_ContentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Hidden"/>
                                         <GridViewRowPresenter x:Name="PART_GridViewRowPesenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Visible" />
@@ -285,8 +272,6 @@
                                                 <DoubleAnimation Storyboard.TargetName="HoverBackground" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.125" />
                                                 <DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Height" To="0" Duration="0:0:0.125" />
                                                 <DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.125" />
-                                                <!--DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Width" To="0" Duration="0:0:0.125" /-->
-                                                <!--ThicknessAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Margin" To="-27,0,-58,0" Duration="0:0:0.125" /-->
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -296,8 +281,6 @@
                                                 <DoubleAnimation Storyboard.TargetName="HoverBackground" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.5" />
                                                 <DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Height" To="38" Duration="0:0:0.25" />
                                                 <DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25" />
-                                                <!--DoubleAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Width" To="300" Duration="0:0:0.25" /-->
-                                                <!--ThicknessAnimation Storyboard.TargetName="Shine" Storyboard.TargetProperty="Margin" To="0" Duration="0:0:0.25" /-->
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -310,10 +293,11 @@
         </Style.Resources>
         <Setter Property="ItemTemplate">
             <Setter.Value>
-                <DataTemplate DataType="{x:Type disk:DiskItem}">
+                <DataTemplate DataType="{x:Type io:FileSystemInfo}">
                     <DockPanel>
-                        <Rectangle Width="32" Height="32" Fill="{Binding ItemLargeIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='32'}" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding ItemDisplayName}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        <Rectangle Width="32" Height="32" VerticalAlignment="Center"/>
+                        <!--Fill="{Binding ItemLargeIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='32'}"-->
+                        <TextBlock Text="{Binding Name}" Margin="6,0,0,0" VerticalAlignment="Center"/>
                     </DockPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -322,11 +306,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListView}">
-                    <!--Border Margin="7,0,0,0" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,1,1,0" CornerRadius="4,4,0,0">
-                        <Border Margin="1,1,1,0" Background="White" CornerRadius="3,3,0,0"-->
-                            <StackPanel IsItemsHost="True" Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
-                        <!--/Border>
-                    </Border-->
+                    <StackPanel IsItemsHost="True" Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -346,7 +326,6 @@
                 <Setter Property="Margin" Value="0,0,0,1"/>
                 <Setter Property="Padding" Value="7,0"/>
                 <Setter Property="Height" Value="33"/>
-                <!--Setter Property="MinWidth" Value="136"/-->
                 <Setter Property="MinWidth" Value="{Binding RightColumnWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Mode=OneWayToSource, FallbackValue=136}"/>
                 <Setter Property="Template">
                     <Setter.Value>
@@ -437,27 +416,21 @@
         </Style.Resources>
         <Setter Property="ItemTemplate">
             <Setter.Value>
-                <DataTemplate DataType="{x:Type disk:DiskItem}">
-                    <!--TextBlock Text="{Binding ItemName}" TextAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5"/-->
-                    <!--Tag="{Binding}"-->
+                <DataTemplate DataType="{x:Type io:DirectoryInfo}">
                     <Grid x:Name="RootGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#01000000">
-                        <!--Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}"-->
                         <Grid.ContextMenu>
                             <ContextMenu>
                                 <e:Interaction.Behaviors>
                                     <local:PlaceContextMenuBehavior TargetItem="{Binding}" OpenMenuItem="{Binding Source={x:Reference Name=OpenMenuItem}}" RemoveMenuItem="{Binding Source={x:Reference Name=RemoveMenuItem}}"/>
-                                    <!--BaseWindow="{Binding Path=Tag, Source={x:Reference Name=RootGrid}}"-->
-                                    <!--BaseWindow="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}"-->
-                                    <!--RemoveMenuItem="{Binding Source={x:Reference Name=RemoveMenuItem}}"-->
                                 </e:Interaction.Behaviors>
                                 <MenuItem x:Name="OpenMenuItem" Header="Open"/>
                                 <MenuItem x:Name="RemoveMenuItem" Header="Remove"/>
                             </ContextMenu>
                         </Grid.ContextMenu>
-                        <!--ContextMenu="{DynamicResource PlacesContextMenu}"-->
                         <DockPanel IsHitTestVisible="False">
-                            <Rectangle Width="24" Height="24" Fill="{Binding ItemLargeIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='24'}" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,6,0" UseLayoutRounding="True" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Visibility="{Binding RightColumnIcons, Source={x:Static local:Config.Instance}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            <TextBlock Text="{Binding ItemDisplayName}" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            <Rectangle Width="24" Height="24"/>
+                            <!--Fill="{Binding ItemLargeIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='24'}" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,6,0" UseLayoutRounding="True" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" Visibility="{Binding RightColumnIcons, Source={x:Static local:Config.Instance}, Converter={StaticResource BooleanToVisibilityConverter}}-->
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" IsHitTestVisible="False"/>
                         </DockPanel>
                     </Grid>
                 </DataTemplate>
@@ -475,46 +448,40 @@
         </Setter>
     </Style>
 
-    <!--Style x:Key="{x:Type TreeView}" TargetType="{x:Type TreeView}">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden"/>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-    </Style-->
-
     <Style x:Key="AllAppsTreeViewStyle" TargetType="{x:Type TreeView}" BasedOn="{StaticResource {x:Type TreeView}}">
-        <Setter Property="ItemTemplate">
-            <Setter.Value>
-                <!---->
-                <HierarchicalDataTemplate DataType="{x:Type disk:DiskItem}" ItemsSource="{Binding SubItems}" ItemContainerStyle="{StaticResource {x:Type TreeViewItem}}">
-                    <DockPanel Margin="0,2">
-                        <Rectangle Width="16" Height="16" Fill="{Binding ItemSmallIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='16'}" VerticalAlignment="Center" DockPanel.Dock="Left"/>
-                        <!--Canvas Width="16" Height="16" DockPanel.Dock="Left" Margin="0,0,8,0">
-                            <Canvas.Background>
-                                <Binding ConverterParameter="16">
-                                    <Binding.Converter>
-                                        <disk:DiskItemToIconImageBrushConverter/>
-                                    </Binding.Converter>
-                                </Binding>
-                            </Canvas.Background>
-                        </Canvas-->
-                        <TextBlock Text="{Binding ItemDisplayName}" Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" VerticalAlignment="Center"/>
-                    </DockPanel>
-                </HierarchicalDataTemplate>
-            </Setter.Value>
-        </Setter>
+        <Style.Resources>
+            <HierarchicalDataTemplate x:Key="DataTemplateBase" DataType="{x:Type io:FileSystemInfo}" ItemsSource="{Binding Converter={StaticResource FileSystemInfoToContentsCollectionConverter}}">
+                <DockPanel Margin="0,2">
+                    <Rectangle Width="16" Height="16" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <!--Fill="{Binding ItemSmallIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='16'}"-->
+                    <TextBlock Text="{Binding Name}" Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" VerticalAlignment="Center"/>
+                </DockPanel>
+            </HierarchicalDataTemplate>
+
+            <HierarchicalDataTemplate DataType="{x:Type io:FileInfo}">
+                <DockPanel Margin="0,2">
+                    <Rectangle Width="16" Height="16" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <!--Fill="{Binding ItemSmallIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='16'}"-->
+                    <TextBlock Text="{Binding Name}" Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" VerticalAlignment="Center"/>
+                </DockPanel>
+            </HierarchicalDataTemplate>
+
+            <HierarchicalDataTemplate DataType="{x:Type io:DirectoryInfo}" ItemsSource="{Binding Converter={StaticResource FileSystemInfoToContentsCollectionConverter}}">
+                <DockPanel Margin="0,2">
+                    <Rectangle Width="16" Height="16" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <!--Fill="{Binding ItemSmallIcon, Converter={StaticResource IconToImageBrushConverter}, ConverterParameter='16'}"-->
+                    <TextBlock Text="{Binding Name}" Foreground="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TreeView}}" VerticalAlignment="Center"/>
+                </DockPanel>
+            </HierarchicalDataTemplate>
+        </Style.Resources>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TreeView}">
-                    <!--Border Margin="7,0,0,0" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,1,1,0" CornerRadius="4,4,0,0">
-                        <Border Margin="1,1,1,0" Background="White" CornerRadius="3,3,0,0"-->
                     <Grid>
                         <ScrollViewer Margin="0,2,7,0" Focusable="False" HorizontalScrollBarVisibility="Disabled">
                             <ItemsPresenter />
                         </ScrollViewer>
                     </Grid>
-                    <!--/Border>
-                    </Border-->
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -533,9 +500,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
-                        <!--Border Margin="7,0,0,0" Background="#60000000" BorderBrush="#60FFFFFF" BorderThickness="1,0">
-                            <Border Margin="1,0" Background="White"/>
-                        </Border-->
                         <Rectangle Fill="#FFD6E5F5" Height="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="13,0,7,0"/>
                         <Grid Margin="10,0">
                             <Border x:Name="HoverBackground" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" CornerRadius="4" BorderThickness="1" BorderBrush="#FF7DA2CE" Opacity="0">
@@ -664,7 +628,6 @@
     </Style>
 
     <Style x:Key="SearchTextBoxStyle" TargetType="{x:Type TextBox}">
-        <!--Setter Property="Padding" Value="0"/-->
         <Setter Property="Margin" Value="13,13,23,12"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -939,7 +902,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                        <!--Grid x:Name="IdleBackground" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" Background="Transparent" Opacity="1"/-->
                         <Border x:Name="HoverBackground" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" CornerRadius="4" BorderThickness="1" BorderBrush="#FF7DA2CE" Opacity="1">
                             <Border BorderThickness="1" CornerRadius="3">
                                 <Border.Background>
@@ -1157,7 +1119,6 @@
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <!--Setter Property="Height" Value="32"/-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
@@ -1238,51 +1199,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <!--Style x:Key="{x:Type apictrl:TouchableContextMenu}" TargetType="{x:Type apictrl:TouchableContextMenu}">
-        <Setter Property="OverridesDefaultStyle" Value="True" />
-        <Setter Property="Grid.IsSharedSizeScope" Value="True" />
-        <Setter Property="Margin" Value="5,0,0,5"/>
-        <Setter Property="Padding" Value="3,3,3,0"/>
-        <Setter Property="HasDropShadow" Value="False" />
-        <Setter Property="ItemContainerStyle">
-            <Setter.Value>
-                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                    <Setter Property="ItemContainerStyle" Value="{Binding Path=Style, RelativeSource={RelativeSource Mode=Self}}"/>
-                    <Setter Property="IsManipulationEnabled" Value="{Binding OpenedWithTouch, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type apictrl:TouchableContextMenu}}}"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsManipulationEnabled" Value="True">
-                            <Setter Property="Height" Value="46.590925" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ContextMenu">
-                    <Grid Margin="{TemplateBinding Margin}">
-                        <Border IsHitTestVisible="False" Background="Black" BorderBrush="Transparent" CornerRadius="7">
-                            <Border.Effect>
-                                <DropShadowEffect x:Name="DropShadow" Color="Black" Direction="230" ShadowDepth="3" BlurRadius="3" Opacity="0.375"/>
-                            </Border.Effect>
-                        </Border>
-                        <Border BorderThickness="0" CornerRadius="6" Margin="0" Padding="{TemplateBinding Padding}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="Transparent">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <LinearGradientBrush.GradientStops>
-                                        <GradientStop Offset="0" Color="#FFD0DCEB"/>
-                                        <GradientStop Offset="0.125" Color="#FFF1F5FB"/>
-                                        <GradientStop Offset="0.875" Color="#FFF1F5FB"/>
-                                        <GradientStop Offset="1" Color="#FFD0DCEB"/>
-                                    </LinearGradientBrush.GradientStops>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                        </Border>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style-->
 </ResourceDictionary>

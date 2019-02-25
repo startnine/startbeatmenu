@@ -19,12 +19,23 @@
     <OutputPath>$(AppData)\Start9\Pipeline\AddIns\StartbeatMenu</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Shale.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Shale.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.0.1" />
     <PackageReference Include="Start9.Api" Version="1.0.0-CI00121" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Start9.UI.Wpf">
       <HintPath>..\..\start9-ui\Start9.UI.Wpf\bin\Debug\netcoreapp3.0\Start9.UI.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>..\..\superbar\Superbar\bin\Debug\System.Windows.Interactivity.dll</HintPath>
     </Reference>
     <Reference Include="WindowsSharp">
       <HintPath>..\..\windows-sharp\WindowsSharp\bin\Debug\netcoreapp3.0\WindowsSharp.dll</HintPath>
