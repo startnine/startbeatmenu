@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using WindowsSharp.DiskItems;
 
 namespace StartbeatMenu
@@ -87,11 +88,11 @@ namespace StartbeatMenu
             Debug.WriteLine("RemoveMenuItem_Click " + (BaseWindow != null).ToString() + " " + (TargetItem != null).ToString());
             if ((BaseWindow != null) && (TargetItem != null))
             {
-                foreach (DiskItem d in BaseWindow.Places)
+                foreach (DirectoryInfo d in BaseWindow.Places)
                 {
-                    if (TargetItem.ItemPath.ToLowerInvariant() == d.ItemPath.ToLowerInvariant()) //(BaseWindow.Places.Contains(TargetItem))
+                    if (TargetItem.ItemPath.ToLowerInvariant() == d.FullName.ToLowerInvariant()) //(BaseWindow.Places.Contains(TargetItem))
                     {
-                        Debug.WriteLine("FOUND: " + d.ItemPath);
+                        Debug.WriteLine("FOUND: " + d.FullName);
                         //(BaseWindow.PlacesListView.ItemsSource as ObservableCollection<DiskItem>).Remove(d);
                         BaseWindow.Places.Remove(d);
                         break;
